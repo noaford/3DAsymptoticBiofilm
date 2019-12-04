@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- 
+	Created By:Noah Ford
+	Creation Date: 08/08/17 15:21
+	Last Modification: 09/12/17 09:25
+
+	No Comments
+-->
+
+<simulation>
+	<control>
+		<param name="restartSimulation">false</param>
+		<param name="startOfSimulation" unit="day">0.000000e+00</param>
+		<param name="startingIterate">0</param>
+		<param name="endOfSimulation" unit="hour">1.000000e-01</param>
+		<param name="timeStep" unit="hour">1.000000e-01</param>
+
+		<param name="verboseLogging">false</param>
+
+		<param name="outputPeriod" unit="hour">1.000000e-01</param>
+		<param name="writeExtraFields">false</param>
+
+		<param name="soluteTolerance">1.000000e-05</param>
+		<param name="soluteMaxIterates">200</param>
+
+		<param name="reinitializationFrequency" unit="iterate">100</param>
+
+		<param name="doUnitConversions">true</param>
+		<param name="lengthComputeUnit">mm</param>
+		<param name="timeComputeUnit">day</param>
+		<param name="massComputeUnit">mgm</param>
+		<param name="potentialComputeUnit">volt</param>
+		<param name="currentComputeUnit">mamp</param>
+	</control>
+
+	<computationDomain>
+		<grid lengthX="1.000000e+03" lengthY="1.000000e+02" resolutionX="2.000000e+00" resolutionY="1.428571e+00" unit="um"/>
+		<boundaryCondition location="x0" class="Inflow"/>
+		<boundaryCondition location="xN" class="Outflow"/>
+		<boundaryCondition location="y0" class="NoFlux"/>
+		<boundaryCondition location="yN" class="NoFlux" />
+	</computationDomain>
+
+	<biofilm>
+		<param name="boundaryLayer" unit="um">0.000000e+00</param>
+		<param name="specificArea" unit="m2/m3">80.000000</param>
+		<param name="maintainVolumeFractionSum" biomass="Inert">true</param>
+		<erosion class="FluidShear">
+			<param name="kDet" unit="m/day">1.000000e-04</param>
+			<param name="b" unit="-">5.800000e-01</param>
+		</erosion>
+		<param name="sloughDetachedBiomass">true</param>
+	</biofilm>
+
+	<!-- generic fields -->
+
+	<!-- diffusive quantities -->
+	<solute name="Oxygen">
+		<param name="liquidDiffusivity" unit="cm2/day">2.2032</param>
+		<param name="biofilmDiffusivityFactor">6.670000e-01</param>
+		<boundaryCondition location="x0" class="ConnectedBulk" bulk="BulkVolume"/>
+	</solute>
+
+	<!-- advective quantities -->
+	<biomass name="Active">
+		<param name="density" unit="mgm/mm3">1.025</param>
+	</biomass>
+	<biomass name="Inert">
+		<param name="density" unit="mgm/mm3">1.0125</param>
+	</biomass>
+
+	<!-- potentials -->
+
+	<bulk name="BulkVolume">
+		<param name="isConstant">false</param>
+		<param name="dilutionRate" unit="1/day">10.000000</param>
+
+		<solute name="Oxygen">
+			<param name="isConstant">true</param>
+			<param name="initialConcentration" unit="mgm/mm3">8.300000e-06</param>
+		</solute>
+	</bulk>
+
+	<!-- fluid flow information -->
+	<fluid>
+		<param name="isUsed">true</param>
+		<param name="solver">stokes</param>
+		<param name="updateTriggerPercent">2.500000e-02</param>
+		<param name="density" unit="kg/m3">1.000000e+03</param>
+		<param name="viscosity" unit="kg/m s">1.100000e-03</param>
+		<boundaryCondition location="x0" class="Parabolic" unit="mm/s">1.000000e+01</boundaryCondition>
+	</fluid>
+
+	<!-- Equilibrium Reactions -->
+
+	<!-- Reactions -->
+	<reaction catalyzedBy="Active" name="Decay">
+		<param name="muMax" unit="1/day">3.000000e-01</param>
+		<kineticFactor class="Monod" field="Oxygen">
+			<param name="Ks" unit="mgm/mm3">5.000000e-07</param>
+		</kineticFactor>
+		<yield name="Active" unit="gm/gm">-1.000000e+00</yield>
+		<yield name="Inert" unit="gm/gm">2.000000e-01</yield>
+		<yield name="Oxygen" unit="gm/gm">-1.136000e+00</yield>
+	</reaction>
+
+	<reaction catalyzedBy="Active" name="Growth">
+		<param name="muMax" unit="1/day">8.000000e+00</param>
+		<kineticFactor class="Monod" field="Oxygen">
+			<param name="Ks" unit="mgm/mm3">5.000000e-07</param>
+		</kineticFactor>
+		<yield name="Active" unit="gm/gm">5.830000e-01</yield>
+		<yield name="Inert" unit="gm/gm">4.770000e-01</yield>
+		<yield name="Oxygen" unit="gm/gm">-1.000000e+00</yield>
+	</reaction>
+
+	<!-- Inoculation -->
+	<inoculation>
+		<!-- Bottom -->
+		<composition type="defined">
+			<biomass name="Active">1.000000</biomass>
+		</composition>
+		<rectangle>
+			<param name="centerX" unit="um">5.000000e+02</param>
+			<param name="centerY" unit="um">0.000000e+00</param>
+			<param name="radiusX" unit="um">4.500000e+02</param>
+			<param name="radiusY" unit="um">1.000000e+01</param>
+		</rectangle>
+	</inoculation>
+	<inoculation>
+		<!-- Top -->
+		<composition type="defined">
+			<biomass name="Active">1.000000</biomass>
+		</composition>
+		<rectangle>
+			<param name="centerX" unit="um">5.000000e+02</param>
+			<param name="centerY" unit="um">1.000000e+02</param>
+			<param name="radiusX" unit="um">4.500000e+02</param>
+			<param name="radiusY" unit="um">1.000000e+01</param>
+		</rectangle>
+	</inoculation>
+</simulation>
